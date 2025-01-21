@@ -12,8 +12,8 @@ module tb_extended_binary_gcd;
   logic [WORD_WIDTH-1:0] y;
   logic done;
   logic [WORD_WIDTH-1:0] gcd_result;
-  logic [WORD_WIDTH-1:0] coeff_i;
-  logic [WORD_WIDTH-1:0] coeff_j;
+  logic signed [WORD_WIDTH-1:0] coeff_i;
+  logic signed [WORD_WIDTH-1:0] coeff_j;
 
   // Instantiate the design under test (DUT)
   extended_binary_gcd #(
@@ -48,14 +48,16 @@ module tb_extended_binary_gcd;
 
     // Test case 1
     enable = 1;
-    x = 36;  // Example values
-    y = 6;
+    x = 29;  // Example values
+    y = 11;
     $display("Time: %0t | Test Case 1 | x: %0d, y: %0d", $time, x, y);
-    // Wait for computation to complete
 
-    //wait (done);
-    #1000
-    // End simulation
+    // Wait for computation to complete
+    wait (done);
+    $display("Time: %0t | GCD(%0d,%0d) = %0d. Bézout's coeffs: %0d,%0d", $time, x, y, gcd_result,
+             coeff_i, coeff_j);
+
+
     $stop;
   end
 

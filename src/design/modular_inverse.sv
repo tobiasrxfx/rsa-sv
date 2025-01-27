@@ -1,9 +1,10 @@
 `timescale 1ns / 1ps
 
+// Adicionar enable? controle dos blocos
 module modular_inverse #(
     parameter int WORD_WIDTH = 32
 ) (
-    input logic signed [WORD_WIDTH-1:0] a,
+    input logic signed [WORD_WIDTH-1:0] gcd_result,
     input logic signed [WORD_WIDTH-1:0] coeff_i,
     input logic signed [WORD_WIDTH-1:0] n,
 
@@ -12,9 +13,14 @@ module modular_inverse #(
 );
 
   always_comb begin
-    if (a == 1) begin
-      if (coeff_i > 0) inv = coeff_i;
-      else inv = coeff_i + n;
+    if (gcd_result == 1) begin
+      if (coeff_i > 0) begin
+        inv   = coeff_i;
+        error = 0;
+      end else begin
+        inv   = coeff_i + n;
+        error = 0;
+      end
     end else begin
       error = 1;
       inv   = 0;

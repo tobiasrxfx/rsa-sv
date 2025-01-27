@@ -1,5 +1,3 @@
-`timescale 1ns / 1ps
-
 /*
 Binary extended gcd algorithm
 This algorithm was desgined using a FSM logic. It is inspired by
@@ -8,6 +6,7 @@ in chapter 14.
 
 Author: Tobias Oliveira on January 10th 2025
 */
+`timescale 1ns / 1ps
 
 module extended_binary_gcd #(
     parameter int WORD_WIDTH = 32
@@ -89,37 +88,32 @@ module extended_binary_gcd #(
         end else begin
           next_state = IDLE;
         end
-        $display("State: IDLE | temp_x: %0d, temp_y: %0d", temp_x, temp_y);
       end
       // This state represents the steps 2 and 3 from the base algorithm
       BOTH_EVEN_CHECK: begin
-        $display("State: BOTH_EVEN | temp_x: %0d, temp_y: %0d", temp_x, temp_y);
         if (temp_x % 2 == 0 & temp_y % 2 == 0) begin
           next_temp_x = temp_x >> 1;
           next_temp_y = temp_y >> 1;
-          next_g = g << 1;
-          next_state = BOTH_EVEN_CHECK;
+          next_g      = g << 1;
+          next_state  = BOTH_EVEN_CHECK;
         end else begin
           next_temp_u = temp_x;
           next_temp_v = temp_y;
-          next_a = 1;
-          next_b = 0;
-          next_c = 0;
-          next_d = 1;
-          next_state = U_EVEN_CHECK;
+          next_a      = 1;
+          next_b      = 0;
+          next_c      = 0;
+          next_d      = 1;
+          next_state  = U_EVEN_CHECK;
         end
       end
       // This state represents the step 4
       U_EVEN_CHECK: begin
-        $display("State: U_EVEN | temp_u: %0d, temp_v: %0d", temp_u, temp_v);
-        $display("State: U_EVEN | temp_X: %0d, temp_Y: %0d", temp_x, temp_y);
         if (temp_u % 2 == 0) begin
           next_temp_u = temp_u >> 1;
           if (a % 2 == 0 & b % 2 == 0) begin
             next_a = a / 2;
             next_b = b / 2;
           end else begin
-            $display("PASSOU!");
             next_a = (a + temp_y) / 2;
             next_b = (b - temp_x) / 2;
           end
@@ -127,11 +121,9 @@ module extended_binary_gcd #(
         end else begin
           next_state = V_EVEN_CHECK;
         end
-        $display("State: U_EVEN | A: %0d, B: %0d", next_a, next_b);
       end
       // This state represents the step 5
       V_EVEN_CHECK: begin
-        $display("State: V_EVEN | temp_u: %0d, temp_v: %0d", temp_u, temp_v);
         if (temp_v % 2 == 0) begin
           next_temp_v = temp_v >> 1;
           if (c % 2 == 0 & d % 2 == 0) begin
@@ -141,7 +133,6 @@ module extended_binary_gcd #(
             next_c = (c + temp_y) / 2;
             next_d = (d - temp_x) / 2;
           end
-          $display("State: V_EVEN | C: %0d, D: %0d", next_c, next_d);
           next_state = U_EVEN_CHECK;
         end else begin
           next_state = U_GREATER_CHECK;
@@ -149,8 +140,6 @@ module extended_binary_gcd #(
       end
       // This state represents the steps 6 and partly 7
       U_GREATER_CHECK: begin
-        $display("State: U_GREAT | temp_u: %0d, temp_v: %0d", temp_u, temp_v);
-        $display("Before --- A: %0d -- B: %0d -- C: %0d -- D: %0d", a, b, c, d);
         if (temp_u >= temp_v) begin
           next_temp_u = temp_u - temp_v;
           next_a = a - c;
@@ -160,12 +149,10 @@ module extended_binary_gcd #(
           next_c = c - a;
           next_d = d - b;
         end
-        $display("After --- A: %0d -- B: %0d -- C: %0d -- D: %0d", a, b, c, d);
         next_state = IS_U_ZERO;
       end
       // This step is the rest of the 7th
       IS_U_ZERO: begin
-        $display("State: IS_U_ZERO | temp_u: %0d, temp_v: %0d", temp_u, temp_v);
         if (temp_u == 0) begin
           next_state = DONE;
         end else begin
@@ -177,19 +164,18 @@ module extended_binary_gcd #(
         coeff_j = d;
         gcd_result = temp_v * g;  // g will be always power of 2
         next_state = DONE;
-        $display("State: DONE | GCD: %0d, g: %0d", gcd_result, g);
       end
       default: next_state = IDLE;
     endcase
   end
 
   // "Done" combinational logic
-  /*always_comb begin
+  always_comb begin
     if (state == DONE) begin
       done = 1;
     end else begin
       done = 0;
     end
-  end*/
+  end
 
 endmodule

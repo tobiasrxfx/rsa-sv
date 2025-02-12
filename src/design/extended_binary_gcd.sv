@@ -26,7 +26,7 @@ module extended_binary_gcd #(
 );
 
   typedef enum logic [7:0] {
-    IDLE = 1,
+    INIT = 1,
     BOTH_EVEN_CHECK = 2,
     U_EVEN_CHECK = 4,
     V_EVEN_CHECK = 8,
@@ -46,14 +46,14 @@ module extended_binary_gcd #(
   // Uptade the next state
   always_ff @(posedge clk or negedge reset) begin
     if (~reset) begin
-      state <= IDLE;
+      state <= INIT;
     end else begin
       state <= next_state;
     end
   end
 
   always_ff @(posedge clk) begin
-    if (state == IDLE) begin
+    if (state == INIT) begin
       temp_x <= x;
       temp_y <= y;
       temp_u <= 0;
@@ -79,14 +79,14 @@ module extended_binary_gcd #(
   // Combinational logic for the FSM
   always_comb begin
     case (state)
-      IDLE: begin
+      INIT: begin
         if (enable) begin
           next_temp_x = x;
           next_temp_y = y;
           next_g = g;
           next_state = BOTH_EVEN_CHECK;
         end else begin
-          next_state = IDLE;
+          next_state = INIT;
         end
       end
       // This state represents the steps 2 and 3 from the base algorithm
@@ -165,7 +165,7 @@ module extended_binary_gcd #(
         gcd_result = temp_v * g;  // g will be always power of 2
         next_state = DONE;
       end
-      default: next_state = IDLE;
+      default: next_state = INIT;
     endcase
   end
 

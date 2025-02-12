@@ -13,6 +13,11 @@
 */
 `timescale 1ns / 1ps
 
+
+/* Montgomery multiplication.
+*  Computes: mult_result = x*y*R^(-1) mod m
+*
+*/
 module montgomery_mult #(
     parameter int WORD_WIDTH = 32
 ) (
@@ -57,10 +62,12 @@ module montgomery_mult #(
   end
 
   always_ff @(posedge clk) begin
+    // Update variables to avoid feedback loops
     ui  <= next_ui;
     A   <= next_A;
     i   <= next_i;
 
+    // Update intermediate variables
     y_0 <= y[0];
     x_i <= x[next_i];
     A_0 <= next_A[0];

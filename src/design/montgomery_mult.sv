@@ -8,7 +8,7 @@
 *   Since 'b' is 2, and 'm' will always be odd, so gcd(m,b) = 1. Then
 *   there is no need to check it. R can be precomputed as R = b^n.
 *
-*   The same goes to m' = -m^(-1)mod b, since 'm' is odd and 'b' is 2, 
+*   The same goes to m' = -m^(-1)mod b, since 'm' is odd and 'b' is 2,
 *   then m' = -1 mod 2  => m' = 1.
 */
 `timescale 1ns / 1ps
@@ -47,7 +47,10 @@ module montgomery_mult #(
   } state_t;
 
   state_t state, next_state;
-  logic unsigned [WORD_WIDTH:0] A, next_A;
+  // The size of A is WORD_WIDTH+1 following the book's instruction.
+  // However, for inputs of size WORD_WIDTH I got around 25% errors when using randomly choseen inputs. I guess it is due A's overflow.
+  // The solution I found was to increase by 1-bit the size of A.
+  logic unsigned [WORD_WIDTH+1:0] A, next_A;
   logic ui, next_ui;
   logic [5:0] i, next_i;
   logic y_0, x_i, A_0;  // Intermediate variables
@@ -97,8 +100,7 @@ module montgomery_mult #(
       end
       LOOP_OP2: begin  // Corresponds to the step 2.2
         next_A = (A + (x_i * y) + (ui * m)) >> 1;
-        next_i = i + 1;
-        $display("Passou %d ", i);
+        next_i = i + 1;  // Can I place it inside a always_ff ?
         if (next_i > WORD_WIDTH - 1) begin
           next_state = CHECK;
         end else begin

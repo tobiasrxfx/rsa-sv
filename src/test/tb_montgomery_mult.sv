@@ -16,7 +16,9 @@ module tb_montgomery_mult;
 
   // Outputs from the DUT
   logic done;
-  logic unsigned [WORD_WIDTH-1:0] mult_result;
+  logic unsigned [WORD_WIDTH-1:0] mult_result, expected_result;
+
+  int file, r, count_valid, count_total;
 
   // Instantiate the Device Under Test (DUT)
   montgomery_mult #(
@@ -42,42 +44,50 @@ module tb_montgomery_mult;
     clk = 0;
     reset = 0;
     enable = 0;
-    m = 72639;  // Example modulus
-    x = 5792;  // Example input x
-    y = 12;  // Example input y
-    R = 33'h100000000;  // R = 2^WORD_WIDTH (WORD_WIDTH = 32, so R = 2^32)
+    count_valid = 0;
+    count_total = 0;
+    //m = 72639;
+    //x = 5792;
+    //y = 12;
+    //R = 33'h100000000;  // R = 2^WORD_WIDTH (WORD_WIDTH = 32, so R = 2^32)
 
-    // Apply reset
-    reset = 1;
-    #10 reset = 0;  // Deassert reset after 10 time units
+    // Open test vector file
+    file = $fopen("test/py-scripts/montgomery_test_vectors.txt", "r");
+    if (file == 0) begin
+      $display("Error opening test vector file!");
+      $finish;
+    end
 
-    // Test case 1: Enable the module
-    enable = 1;
-    #10 enable = 0;  // Disable after 10 time units
+    while (!$feof(
+        file
+    )) begin
 
-    // Wait for the module to finish
-    wait (done == 1'b1);
+      r = $fscanf(file, "%d %d %d %d\n", x, y, m, expected_result);
+      //if (r != 4) continue;  // Skip lines that do not have enough values
 
-    // Check the result
-    $display("Mult Result: %d", mult_result);
-    $display("Done: %b", done);
-    /*
-        // Test case 2: Another set of inputs
-        m = 32'h7F7F7F7F;
-        x = 32'h1F1F1F1F;
-        y = 32'h2F2F2F2F;
-        R = 33'h100000000; // Same R value as before
-        enable = 1;
-        #10 enable = 0;  // Disable after 10 time units
+      // Apply reset
+      reset = 1;
+      #10 reset = 0;  // Deassert reset after 10 time units
 
-        // Wait for the module to finish
-        wait(done == 1'b1);
+      // Test case 1: Enable the module
+      enable = 1;
+      #10 enable = 0;  // Disable after 10 time units
 
-        // Check the result
-        $display("Mult Result: %h", mult_result);
-        $display("Done: %b", done);
-        */
-    // End simulation
+      // Wait for completion
+      wait (done);
+      // Check the result
+      if (mult_result !== expected_result) begin
+        $display("Test FAILED: x=%d, y=%d, m=%d, result=%d, expected=%d", x, y, m, mult_result,
+                 expected_result);
+      end else begin
+        count_valid++;
+      end
+      count_total++;
+    end
+
+    $display("Test PASSED: %d out of %d", count_valid, count_total);
+    $display("--- End of Tests ---");
+
     $finish;
   end
 

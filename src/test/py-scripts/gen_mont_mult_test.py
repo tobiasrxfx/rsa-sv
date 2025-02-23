@@ -1,11 +1,11 @@
 import random
 
-def montgomery_mul(x, y, m, R_bits=10):
+def montgomery_mul(x, y, m, R_bits=32):
     """
     Computes Montgomery multiplication (x * y * R^(-1) mod m)
     where R = 2^R_bits.
     """
-    R = 1 << 32  # R = 2^R_bits
+    R = 1 << R_bits  # R = 2^R_bits
     R_inv = pow(R, -1, m)  # Compute R^(-1) mod m using modular inverse
     if x<m and y<m:
         result = (x * y * R_inv) % m

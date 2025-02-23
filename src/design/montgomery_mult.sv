@@ -74,6 +74,9 @@ module montgomery_mult #(
     y_0 <= y[0];
     x_i <= x[next_i];
     A_0 <= next_A[0];
+
+    if (state == DONE) done <= 1;
+    else done <= 0;
   end
 
   always_comb begin
@@ -83,7 +86,7 @@ module montgomery_mult #(
           next_A = 0;  // Step 1
           next_i = 0;
           next_state = LOOP_OP1;
-          done = 1'b0;
+          // done = 1'b0;
         end else begin
           next_state = INIT;
         end
@@ -117,7 +120,7 @@ module montgomery_mult #(
         end
       end
       DONE: begin
-        done = 1'b1;
+        // done = 1'b1;
         next_state = INIT;
       end
       default: begin

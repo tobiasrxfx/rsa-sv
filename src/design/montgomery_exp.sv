@@ -1,8 +1,7 @@
 `timescale 1ns / 1ps
 
 module montgomery_exp #(
-    parameter int WORD_WIDTH = 32,
-    parameter int E_WIDTH = 20
+    parameter int WORD_WIDTH = 32
 ) (
     // In/out control bits
     input  logic enable,
@@ -13,8 +12,13 @@ module montgomery_exp #(
     // Input data
     input logic unsigned [WORD_WIDTH-1:0] m,
     input logic unsigned [WORD_WIDTH-1:0] x,
-    input logic unsigned [E_WIDTH-1:0] e,
-    input logic unsigned [WORD_WIDTH:0] R,  // R = 2^WORD_WIDTH; Can be computed inside the module
+    input logic unsigned [WORD_WIDTH-1:0] e,
+    input logic unsigned [  WORD_WIDTH:0] R,  // R = 2^WORD_WIDTH; Can be computed inside the module
+
+    // This is an special input which is not preset in the Algorithm description.
+    // This input contains the actual lenght of 'e', or the actual MSB of 'e'.
+    // It can count from 0 to 31, enough for this case.
+    input logic unsigned [4:0] t,
 
     // Output data
     output logic unsigned [WORD_WIDTH-1:0] exp_result
@@ -27,7 +31,7 @@ module montgomery_exp #(
   logic unsigned [WORD_WIDTH-1:0] mult_result;
   logic unsigned [WORD_WIDTH-1:0] A, next_A;
   logic unsigned [WORD_WIDTH-1:0] x_tilde;
-  logic unsigned [WORD_WIDTH-1:0] i, next_i;
+  logic unsigned [4:0] i, next_i;  // The same bit-length as the input 't'
   logic e_i;
   logic unsigned [2*WORD_WIDTH:0] R_squared;
 
@@ -89,7 +93,7 @@ module montgomery_exp #(
         if (enable) begin
           enable_mult = 0;
           reset_mult  = 0;
-          next_i      = E_WIDTH;  // Set initial value
+          next_i      = t;  // Set initial for loop value
           next_state  = PREP_STEP_1;
         end else begin
           next_state = INIT;

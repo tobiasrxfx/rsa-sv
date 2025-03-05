@@ -12,15 +12,15 @@ module tb_montgomery_exp;
 
   logic unsigned [WORD_WIDTH-1:0] m;
   logic unsigned [WORD_WIDTH-1:0] x;
-  logic unsigned [E_WIDTH-1:0] e;
+  logic unsigned [WORD_WIDTH-1:0] e;
   logic unsigned [WORD_WIDTH:0] R;
   logic unsigned [WORD_WIDTH-1:0] exp_result, expected_result;
+  logic unsigned [4:0] t;
 
   int file, r, count_valid, count_total;
 
   montgomery_exp #(
-      .WORD_WIDTH(WORD_WIDTH),
-      .E_WIDTH(E_WIDTH)
+      .WORD_WIDTH(WORD_WIDTH)
   ) dut_uu (
       .enable(enable),
       .clk(clk),
@@ -29,6 +29,7 @@ module tb_montgomery_exp;
       .m(m),
       .x(x),
       .e(e),
+      .t(t),
       .R(R),
       .exp_result(exp_result)
   );
@@ -46,6 +47,7 @@ module tb_montgomery_exp;
     R = 1 << WORD_WIDTH;
     count_valid = 0;
     count_total = 0;
+    t = 16;
 
     // Open test vector file
     file = $fopen("test/py-scripts/exp_test_vectors.txt", "r");
@@ -83,7 +85,7 @@ module tb_montgomery_exp;
 
     $display("Test PASSED: %d out of %d", count_valid, count_total);
     $display("--- End of Tests ---");
-
+    $display("%t", $time);
     $finish;
   end
 

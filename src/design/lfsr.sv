@@ -1,7 +1,6 @@
 // This method of generating pseudo-random integers is not secure.
 // LFSR (Linear Feedback Shift Register).
 
-
 `timescale 1ns / 1ps
 
 

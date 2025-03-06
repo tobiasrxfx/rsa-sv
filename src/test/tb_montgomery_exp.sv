@@ -47,7 +47,33 @@ module tb_montgomery_exp;
     R = 1 << WORD_WIDTH;
     count_valid = 0;
     count_total = 0;
-    t = 16;
+    t = 3;
+
+    // Apply reset
+    reset = 1;
+    #10 reset = 0;  // Deassert reset after 10 time units
+
+    exp_result = 2;
+    x = 2;
+    e = 9;
+    m = 10;
+    // Test case 1: Enable the module
+    enable = 1;
+    #10 enable = 0;  // Disable after 10 time units
+
+    // Wait for completion
+    wait (done);
+    // Check the result
+    if (exp_result !== expected_result) begin
+      $display("Test FAILED: x=%d, e=%d, m=%d, result=%d, expected=%d", x, e, m, exp_result,
+               expected_result);
+    end else begin
+      count_valid++;
+    end
+    count_total++;
+
+    $display("Test PASSED: %d out of %d", count_valid, count_total);
+
 
     // Open test vector file
     file = $fopen("test/py-scripts/exp_test_vectors.txt", "r");

@@ -9,8 +9,11 @@ module tb_miller_rabin;
   logic enable;
   logic done;
   logic [WORD_WIDTH-1:0] n;
-  logic [5:0] t;
+  logic [5:0] security_parameter;
   logic is_prime;
+  logic expected_result;
+
+  int file, r, count_valid, count_total;
 
   // Instantiate the DUT
   miller_rabin #(
@@ -21,7 +24,7 @@ module tb_miller_rabin;
       .enable(enable),
       .done(done),
       .n(n),
-      .t(t),
+      .security_parameter(security_parameter),
       .is_prime(is_prime)
   );
 
@@ -29,65 +32,70 @@ module tb_miller_rabin;
   always #5 clk = ~clk;  // 10ns period
 
   initial begin
+    // $dumpfile("wave_miller_rabin.vcd");
+    // $dumpvars();
+
     // Initialize signals
     clk = 0;
     rst = 0;
     enable = 0;
+    count_valid = 0;
+    count_total = 0;
     n = 0;
-    t = 5;  // Number of iterations (security parameter)
+    security_parameter = 2;  // Number of iterations (security parameter)
 
-    // // Apply reset
-    // #10 rst = 1;
-    // #10 rst = 0;
-
-    // // Test case 1: Small prime number (e.g., 7)
-    // n = 7;
-    // enable = 1;
-    // #10 enable = 0;
-    // wait (done);
-    // $display("Test 1: n = %d, is_prime = %b (Expected: 1)", n, is_prime);
-
-    // // Apply reset
-    // #5 rst = 1;
-    // #5 rst = 0;
-    // // Test case 2: Small composite number (e.g., 8)
-    // #20;
-    // n = 8;
-    // enable = 1;
-    // #10 enable = 0;
-    // wait (done);
-    // $display("Test 2: n = %d, is_prime = %b (Expected: 0)", n, is_prime);
-
-    // // Apply reset
-    // #5 rst = 1;
-    // #5 rst = 0;
-
-    // // Test case 3: Large prime number (e.g., 97)
-    // #20;
-    // n = 11;
-    // enable = 1;
-    // #10 enable = 0;
-    // wait (done);
-    // $display("Test 3: n = %d, is_prime = %b/1", n, is_prime);
-
-
+    /*
     // Apply reset
-    #5 rst = 1;
-    #5 rst = 0;
+    #10 rst = 1;
+    #10 rst = 0;
 
-
-    // Test case 4: Large composite number (e.g., 100)
-    #20;
-    n = 10;
+    n = 17;
+    expected_result = 1;
     enable = 1;
     #10 enable = 0;
+
     wait (done);
-    $display("Test 4: n = %d, is_prime = %b/0", n, is_prime);
 
-    // Apply reset
-    #5 rst = 1;
-    #5 rst = 0;
+    $display("Test: n=%d, expected_result=%d, model_result=%d", n, expected_result, is_prime);
 
+*/
+
+    // Open test vector file
+    file = $fopen("test/py-scripts/miller_rabin_test_vectors.txt", "r");
+    if (file == 0) begin
+      $display("Error opening test vector file!");
+      $finish;
+    end
+
+
+    while (!$feof(
+        file
+    )) begin
+
+      r   = $fscanf(file, "%d %d\n", n, expected_result);
+
+      // Apply reset
+      rst = 1;
+      #10 rst = 0;  // Deassert reset after 10 time units
+
+      // Test case 1: Enable the module
+      enable = 1;
+      #10 enable = 0;  // Disable after 10 time units
+
+      // Wait for completion
+      wait (done);
+      // Check the result
+      if (is_prime !== expected_result) begin
+        $display("Test FAILED: n=%d, expected_result=%d, model_result=%d", n, expected_result,
+                 is_prime);
+      end else begin
+        count_valid++;
+      end
+      count_total++;
+    end
+
+    $display("Test PASSED: %d out of %d", count_valid, count_total);
+    $display("--- End of Tests ---");
 
     $finish;
   end

@@ -176,7 +176,7 @@ module montgomery_exp #(
         reset_mult  = 0;
         enable_mult = 1;
         if (done_mult) begin
-          exp_result  = mult_result;
+          //exp_result  = mult_result;
           reset_mult  = 1;
           enable_mult = 0;
           next_state  = DONE;
@@ -186,6 +186,7 @@ module montgomery_exp #(
       end
       DONE: begin
         // done = 1;
+        exp_result = mult_result;
         next_state = INIT;
       end
       default: next_state = INIT;

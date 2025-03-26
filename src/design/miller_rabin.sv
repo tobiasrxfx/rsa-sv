@@ -1,6 +1,5 @@
 `timescale 1ns / 1ps
 
-
 module miller_rabin #(
     parameter int WORD_WIDTH = 32
 ) (
@@ -10,7 +9,7 @@ module miller_rabin #(
     output logic done,
 
     input logic [WORD_WIDTH-1:0] n,
-    input logic [5:0] t, // Change name because there is the same name used in montgomery exponentiation.
+    input logic [1:0] security_parameter,
 
     output logic is_prime
 );
@@ -19,11 +18,12 @@ module miller_rabin #(
   logic [WORD_WIDTH-1:0] r, next_r;
   logic signed [10:0] s, next_s;  //  can hold until +/-512
   logic signed [10:0] j, next_j;
-  logic [5:0] i, next_i;  // can hold untill 63 (enogh since a good t ~= 40)
+  logic [1:0] i, next_i;  // enogh since a good t ~= 40
   logic enable_exp, reset_exp, done_exp;
   logic [WORD_WIDTH-1:0] exp_result, arg_x, arg_e;
   logic [WORD_WIDTH:0] R;
-  logic [4:0] arg_t;
+  logic [$clog2(WORD_WIDTH)-1:0] arg_t;  // Length of exponent of exponentiation (arg_e).
+  logic [WORD_WIDTH-1:0] lut_output;
 
   montgomery_exp #(
       .WORD_WIDTH(WORD_WIDTH)
@@ -40,14 +40,20 @@ module miller_rabin #(
       .exp_result(exp_result)
   );
 
+  miller_rabin_base_lut unit_lut (
+      .index(i),
+      .out  (lut_output)
+  );
+
   typedef enum logic [3:0] {
-    INIT,
-    FIND_R_S,
-    PREP_STEP_2_2,
-    STEP_2_2,
-    PREP_STEP_2_3,
-    STEP_2_3,
-    DONE
+    INIT          = 0,
+    FIND_R_S      = 1,  // State for finding 'r' and 's' values
+    PREP_STEP_2_2 = 2,  // State for preparing for step 2.2
+    STEP_2_2      = 3,  // State for Step 2.3 part 1
+    PREP_STEP_2_3 = 4,  // State for preparing for step 2.3
+    STEP_2_3_1    = 5,  // State for step 2.3 part 1
+    STEP_2_3_2    = 6,  // State for step 2.3 part 2
+    DONE          = 7   // Done state
   } state_t;
 
   state_t state, next_state;
@@ -95,7 +101,6 @@ module miller_rabin #(
 
       FIND_R_S: begin
         if ((r & 1) == 0) begin
-          // $display("next_r = %d, next_s = %d", next_r, next_s);
           next_r = r >> 1;
           next_s = s + 1;
           next_state = FIND_R_S;
@@ -104,10 +109,14 @@ module miller_rabin #(
         end
       end
       PREP_STEP_2_2: begin
-        arg_x = 2;  // Need to be choosen randomly for each loop turn
+        arg_x = lut_output;  // Need to be choosen randomly for each loop turn
         arg_e = r;
-        arg_t = 10;  // ?????
-        if (i > t) begin
+        /** This argument arg_t is the legnth of arg_e. For this RSA implementation since P and Q need
+            to be lenght fixed, arg_t is fixed to WORD_WIDTH-1. For an general purpose primality test
+            arg_t shall be calculed at run time or other exponentiation method used.
+        */
+        arg_t = WORD_WIDTH - 1;  // Read above comment
+        if (i > security_parameter) begin
           next_state = DONE;
           is_prime   = 1;  // Prime
         end else begin
@@ -127,7 +136,6 @@ module miller_rabin #(
           next_state = PREP_STEP_2_3;
         end else begin
           next_state = STEP_2_2;
-          $display("exp_result = %d, a = %d, e = %d, n = %d", exp_result, arg_x, arg_e, n);
         end
       end
 
@@ -138,37 +146,42 @@ module miller_rabin #(
           arg_e = 2;
           arg_t = 1;
 
-          next_state = STEP_2_3;
+          next_j = 1;  // Re-initialize the while loop index
+
+          next_state = STEP_2_3_1;
         end else begin
           next_state = PREP_STEP_2_2;
         end
       end
 
-      STEP_2_3: begin
-        //$display("j = %d, s = %d, exp_res=%d, n = %d", j, s - 1, exp_result, n);
+      STEP_2_3_1: begin
+
         if ((j <= s - 1) && (exp_result != n - 1)) begin
-          // $display("Got in");
-          reset_exp  = 0;
-          enable_exp = 1;
-          if (done_exp) begin
-            reset_exp = 1;
-            enable_exp = 0;
-            next_j = j + 1;
-            if (exp_result == 1) begin
-              next_state = DONE;
-              is_prime   = 0;  // Composite
-            end
-          end else begin
-            next_state = STEP_2_3;
-          end
+          arg_x = exp_result;  // agr_x = y
+          next_state = STEP_2_3_2;
+        end else if (exp_result != n - 1) begin
+          next_state = DONE;
+          is_prime   = 0;  // Composite
         end else begin
-          // $display("Got out");
-          if (exp_result != n - 1) begin
+          next_state = PREP_STEP_2_2;
+        end
+      end
+
+      STEP_2_3_2: begin
+        reset_exp  = 0;
+        enable_exp = 1;
+        if (done_exp) begin
+          reset_exp  = 1;
+          enable_exp = 0;
+          if (exp_result == 1) begin
             next_state = DONE;
             is_prime   = 0;  // Composite
           end else begin
-            next_state = PREP_STEP_2_2;
+            next_j = j + 1;
+            next_state = STEP_2_3_1;
           end
+        end else begin
+          next_state = STEP_2_3_2;
         end
       end
 

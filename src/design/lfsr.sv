@@ -15,7 +15,7 @@ module lfsr #(
   // Internal register holding the state
   logic [WORD_WIDTH-1:0] lfsr;
 
-  // Feedback taps for 512-bit. If the word bit changes it need to be changed too. 
+  // Feedback taps for 512-bit. If the word bit changes it need to be changed too.
   // Source for this taps: https://datacipy.elektroniche.cz/lfsr_table.pdf
   wire feedback = lfsr[511] ^ lfsr[509] ^ lfsr[506] ^ lfsr[503];
 

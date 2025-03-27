@@ -9,7 +9,7 @@ module tb_miller_rabin;
   logic enable;
   logic done;
   logic [WORD_WIDTH-1:0] n;
-  logic [5:0] security_parameter;
+  logic [1:0] security_parameter;
   logic is_prime;
   logic expected_result;
 

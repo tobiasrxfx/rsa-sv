@@ -8,7 +8,7 @@ module miller_rabin #(
     input  logic enable,
     output logic done,
 
-    input logic [WORD_WIDTH-1:0] n,
+    input logic [WORD_WIDTH/2-1:0] n,
     input logic [1:0] security_parameter,
 
     output logic is_prime

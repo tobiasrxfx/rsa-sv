@@ -45,11 +45,12 @@ module tb_extended_binary_gcd;
 
     // Apply reset
     #10 reset = 1;
+    #10 reset = 0;
 
     // Test case 1
     enable = 1;
-    x = 29;  // Example values
-    y = 11;
+    x = 693;  // Example values
+    y = 609;
     $display("Time: %0t | Test Case 1 | x: %0d, y: %0d", $time, x, y);
 
     // Wait for computation to complete
@@ -58,7 +59,7 @@ module tb_extended_binary_gcd;
              coeff_i, coeff_j);
 
 
-    $stop;
+    $finish;
   end
 
 endmodule

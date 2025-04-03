@@ -1,12 +1,11 @@
 `timescale 1ns / 1ps
 
-// Adicionar enable? controle dos blocos
 module modular_inverse #(
     parameter int WORD_WIDTH = 32
 ) (
-    input logic signed [WORD_WIDTH-1:0] gcd_result,
-    input logic signed [WORD_WIDTH-1:0] coeff_i,
-    input logic signed [WORD_WIDTH-1:0] n,
+    input logic [WORD_WIDTH-1:0] gcd_result,
+    input logic signed [WORD_WIDTH:0] coeff_i,
+    input logic [WORD_WIDTH-1:0] n,
 
     output logic [WORD_WIDTH-1:0] inv,
     output logic error

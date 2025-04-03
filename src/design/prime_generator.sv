@@ -9,14 +9,14 @@ module prime_generator #(
     input  logic start,
     output logic done,
 
-    output logic [WORD_WIDTH-1:0] P,
-    output logic [WORD_WIDTH-1:0] Q
+    output logic [WORD_WIDTH/2-1:0] P,
+    output logic [WORD_WIDTH/2-1:0] Q
 );
 
-  logic [WORD_WIDTH-1:0] rand_num;
+  logic [WORD_WIDTH/2-1:0] rand_num;
   logic [1:0] security_param = 1;
   logic enable_mr, done_mr, is_prime;
-  logic [WORD_WIDTH-1:0] candidate;
+  logic [WORD_WIDTH/2-1:0] candidate;
 
   typedef enum logic [2:0] {
     IDLE,

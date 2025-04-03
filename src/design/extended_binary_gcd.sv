@@ -15,14 +15,14 @@ module extended_binary_gcd #(
     input logic clk,
     input logic reset,
 
-    input logic signed [WORD_WIDTH-1:0] x,
-    input logic signed [WORD_WIDTH-1:0] y,
+    input logic [WORD_WIDTH-1:0] x,
+    input logic [WORD_WIDTH-1:0] y,
 
     output logic done,
 
     output logic [WORD_WIDTH-1:0] gcd_result,
-    output logic [WORD_WIDTH-1:0] coeff_i,
-    output logic [WORD_WIDTH-1:0] coeff_j
+    output logic signed [WORD_WIDTH:0] coeff_i,
+    output logic signed [WORD_WIDTH:0] coeff_j
 );
 
   typedef enum logic [7:0] {
@@ -37,15 +37,15 @@ module extended_binary_gcd #(
 
 
   state_t state, next_state;
-  logic signed [WORD_WIDTH-1:0] temp_x, temp_y, temp_u, temp_v;
-  logic signed [WORD_WIDTH-1:0] a, b, c, d;  // Hold the Bezout's coefficients
-  logic signed [WORD_WIDTH-1:0] next_temp_x, next_temp_y, next_temp_u, next_temp_v;
-  logic signed [WORD_WIDTH-1:0] next_a, next_b, next_c, next_d;  // Hold the Bezout's coefficients
-  logic signed [WORD_WIDTH-1:0] g, next_g;  // Factor that counts trailing zeroes
+  logic signed [WORD_WIDTH:0] temp_x, temp_y, temp_u, temp_v;
+  logic signed [WORD_WIDTH:0] a, b, c, d;  // Hold the Bezout's coefficients
+  logic signed [WORD_WIDTH:0] next_temp_x, next_temp_y, next_temp_u, next_temp_v;
+  logic signed [WORD_WIDTH:0] next_a, next_b, next_c, next_d;  // Hold the Bezout's coefficients
+  logic signed [WORD_WIDTH:0] g, next_g;  // Factor that counts trailing zeroes
 
   // Uptade the next state
-  always_ff @(posedge clk or negedge reset) begin
-    if (~reset) begin
+  always_ff @(posedge clk or posedge reset) begin
+    if (reset) begin
       state <= INIT;
     end else begin
       state <= next_state;

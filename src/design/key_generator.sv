@@ -8,9 +8,10 @@ module key_generator #(
     input  logic start,
     output logic done,
 
-    output logic [WORD_WIDTH-1:0] N,
-    output logic [WORD_WIDTH-1:0] d,
-    output logic [WORD_WIDTH-1:0] e
+    input  logic [WORD_WIDTH/2-1:0] seed,
+    output logic [  WORD_WIDTH-1:0] N,
+    output logic [  WORD_WIDTH-1:0] d,
+    output logic [  WORD_WIDTH-1:0] e
 );
 
   typedef enum logic [2:0] {
@@ -41,6 +42,7 @@ module key_generator #(
       .rst(pg_rst),
       .start(pg_start),
       .done(pg_done),
+      .seed(seed),
       .P(P),
       .Q(Q)
   );

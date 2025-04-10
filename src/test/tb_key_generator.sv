@@ -12,6 +12,7 @@ module tb_key_generator;
   logic [WORD_WIDTH-1:0] N;
   logic [WORD_WIDTH-1:0] d;
   logic [WORD_WIDTH-1:0] e;
+  logic [WORD_WIDTH/2-1:0] seed;
 
   key_generator #(
       .WORD_WIDTH(WORD_WIDTH)
@@ -20,6 +21,7 @@ module tb_key_generator;
       .rst(rst),
       .start(start),
       .done(done),
+      .seed(seed),
       .N(N),
       .d(d),
       .e(e)
@@ -34,7 +36,7 @@ module tb_key_generator;
     clk   = 0;
     rst   = 0;
     start = 0;
-
+    seed  = 16'h11AF;
     // Reset for a few cycles
     #155;
     rst = 1;

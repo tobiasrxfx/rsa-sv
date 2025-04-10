@@ -9,6 +9,7 @@ module prime_generator #(
     input  logic start,
     output logic done,
 
+    input  logic [WORD_WIDTH/2-1:0] seed,
     output logic [WORD_WIDTH/2-1:0] P,
     output logic [WORD_WIDTH/2-1:0] Q
 );
@@ -37,6 +38,7 @@ module prime_generator #(
   ) rng (
       .clk(clk),
       .rst(rst),
+      .seed(seed),
       .rand_out(rand_num)
   );
 

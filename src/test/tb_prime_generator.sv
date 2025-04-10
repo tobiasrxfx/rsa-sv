@@ -8,7 +8,7 @@ module tb_prime_generator;
   logic rst;
   logic start;
   logic done;
-  logic [WORD_WIDTH-1:0] P, Q;
+  logic [WORD_WIDTH/2-1:0] P, Q, seed;
 
   // Instantiate the Prime Generator
   prime_generator #(
@@ -18,6 +18,7 @@ module tb_prime_generator;
       .rst(rst),
       .start(start),
       .done(done),
+      .seed(seed),
       .P(P),
       .Q(Q)
   );
@@ -27,13 +28,14 @@ module tb_prime_generator;
 
   initial begin
 
-    $dumpfile("wave_miller_rabin.vcd");
-    $dumpvars();
+    //$dumpfile("wave_miller_rabin.vcd");
+    //$dumpvars();
     // Initialize signals
     clk   = 0;
     rst   = 0;
     start = 0;
 
+    seed  = 16'h11EA;
     // Reset for a few cycles
     #20;
     rst = 1;

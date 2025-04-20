@@ -16,9 +16,8 @@ module montgomery_exp #(
     input logic unsigned [  WORD_WIDTH:0] R,  // R = 2^WORD_WIDTH; Can be computed inside the module
 
     // This is an special input which is not preset in the Algorithm description.
-    // This input contains the actual lenght of 'e', or the actual MSB of 'e'.
-    // It can count from 0 to 31, enough for this case.
-    input logic unsigned [4:0] t,
+    // This input contains the actual MSB of 'e'.
+    input logic unsigned [$clog2(WORD_WIDTH)-1:0] t,
 
     // Output data
     output logic unsigned [WORD_WIDTH-1:0] exp_result
